@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import { Alert, Box, Typography } from '@mui/material';
 import io from 'socket.io-client';
 import { Grid } from '@mui/material';
-
+import StockInput from './components/StockInput';
+import WatchListStocks from './components/WatchListStocks';
 
 export interface Stock {
   symbol: string;
@@ -26,16 +27,15 @@ export interface Stock {
 
 function App() {
   const [stocks, setStocks] = useState<Stock[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
 
   useEffect(() => {
     const fetchStocks = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/stocks');
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/stocks/watchlist`);
         setStocks(response.data);
         setLoading(false);
       } catch (err: any) {
@@ -47,33 +47,16 @@ function App() {
     fetchStocks();
   }, []);
 
-
   useEffect(() => {
-    const socket = io('http://localhost:5000');
-
-    socket.on('connect', () => {
-      console.log('Connected to the Socket.IO server');
-    });
-
-    socket.on('stocks', (data) => {
-      console.log('Data Received ========================',data);
-      setStocks(data);
+    const socket = io(`${process.env.REACT_APP_API_URL}`, { withCredentials: true });
+    socket.on('FromAPI', (stocks) => {
+      setStocks(stocks)
       setLastUpdateTime(new Date());
-      setLoading(false);
-    })
-
-    socket.on('connect_error', (error: any) => {
-      console.error('WebSocket connection error:', error);
-      setError(error.message);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Disconnected from the Socket.IO server');
     });
 
     return () => {
       socket.disconnect();
-    };
+    }
   }, []);
 
   useEffect(() => {
@@ -88,78 +71,31 @@ function App() {
     return () => clearInterval(interval);
   }, [lastUpdateTime]);
 
-  if (loading) {
-    return <Typography>Loading...</Typography>;
-  }
-
   if (error) {
-    return <Typography>Error: {error}</Typography>;
+    return <Alert severity="error">Something Went Wrong...</Alert>
   }
 
   return (
-    <div>
-      <Typography variant="h4" style={{ margin: '20px 0' }}>Stock Data</Typography>
-      {lastUpdateTime && (
-        <Typography variant="subtitle1">
-          Stocks data updated {elapsedTime} seconds ago
+    <Box sx={{ mx: 20, display: 'flex', flexDirection: "column", alignItems: "center" }}>
+      <Box sx={{ display: 'flex', flexDirection: "column", alignItems: "center", mb: 5 }}>
+        <Typography variant="h3">
+          Live Stocks Data
         </Typography>
-      )}
-      <Grid container spacing={2}>
-        <Grid item xs={8}>
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Symbol</TableCell>
-                  <TableCell >Identifier</TableCell>
-                  <TableCell >Open</TableCell>
-                  {/* <TableCell >Day High</TableCell> */}
-                  {/* <TableCell >Day Low</TableCell> */}
-                  <TableCell >Last Price</TableCell>
-
-                  <TableCell >Change</TableCell>
-                  <TableCell >Price Change</TableCell>
-                  {/* <TableCell >Total Traded Volume</TableCell> */}
-                  {/* <TableCell >Total Traded Value</TableCell> */}
-                  <TableCell >Last Update Time</TableCell>
-                  {/* <TableCell >Per Change 365d</TableCell> */}
-                  {/* <TableCell >Per Change 30d</TableCell> */}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stocks.map((stock, index) => (
-                  <TableRow
-                    key={index}
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {stock.symbol}
-                    </TableCell>
-                    <TableCell >{stock.identifier}</TableCell>
-                    <TableCell >{stock.open}</TableCell>
-                    {/* <TableCell >{stock.dayHigh}</TableCell> */}
-                    {/* <TableCell >{stock.dayLow}</TableCell> */}
-                    <TableCell >{stock.lastPrice}</TableCell>
-
-                    <TableCell >{stock.change}</TableCell>
-                    <TableCell >{stock.pChange}</TableCell>
-                    {/* <TableCell >{stock.totalTradedVolume}</TableCell> */}
-                    {/* <TableCell >{stock.totalTradedValue}</TableCell> */}
-                    <TableCell >{stock.lastUpdateTime}</TableCell>
-                    {/* <TableCell >{stock.perChange365d}</TableCell> */}
-                    {/* <TableCell >{stock.perChange30d}</TableCell> */}
-
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Grid>
+        {lastUpdateTime && (
+          <Typography variant="subtitle1">
+            Stocks data updated {elapsedTime} seconds ago
+          </Typography>
+        )}
+      </Box>
+      <Grid container spacing={4}>
         <Grid item xs={4}>
-          <Typography variant="h4">Right Side Content</Typography>
+          <StockInput setStocks={setStocks} stocks={stocks} />
+        </Grid>
+        <Grid item xs={8}>
+          <WatchListStocks loading={loading} stocks={stocks} />
         </Grid>
       </Grid>
-    </div>
+    </Box>      
   );
 }
 
