@@ -11,12 +11,12 @@ The goal of this project is to create a real-time stock market dashboard that di
 1. **Clone the Repository**:
 
 - Clone the repository to your local machine using the following command:
-### `git clone https://github.com/waqashussain2194/stock-app-client.git`
+`git clone https://github.com/waqashussain2194/stock-app-client.git`
 
 2. **Install Dependencies**:
 
 - Navigate to the project directory and install the necessary dependencies:
-### `npm install`
+`npm install`
 
 3. **Environment Variables**:
 
