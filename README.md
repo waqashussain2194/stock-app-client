@@ -28,3 +28,10 @@ To start the application in development mode, run the following command:
 ### `npm start`
 
 This will run the app in development mode. Open [http://localhost:3000](http://localhost:3000) to view it in your browser. The page will automatically reload if you make any changes to the code.
+
+## Some Screen shots of the running app.
+<img width="1675" alt="Screenshot 2024-01-21 at 1 50 36 AM" src="https://github.com/waqashussain2194/todos-app/assets/109997361/ba18ef47-402a-45aa-8fb5-79cbfe755774">
+
+<img width="1675" alt="Screenshot 2024-01-21 at 1 50 53 AM" src="https://github.com/waqashussain2194/todos-app/assets/109997361/a95c13b6-b7ee-44b5-9965-7dbdf0e98c5c">
+
+<img width="1677" alt="Screenshot 2024-01-21 at 1 51 22 AM" src="https://github.com/waqashussain2194/todos-app/assets/109997361/39590f89-4e49-4a56-9c33-d06ef55c8e38">
